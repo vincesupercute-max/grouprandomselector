@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Random Group Leader</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe, #7b5cff);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 15px;
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .auth-card {
+            max-width: 420px;
+            margin-top: 8vh;
+        }
+
+        h1 {
+            margin: 0 0 5px 0;
+            text-align: center;
+            color: #3b3b98;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            background: #edeaff;
+            color: #3b3b98;
+            box-shadow: none;
+        }
+
+        .tab.active {
+            background: #7b5cff;
+            color: white;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        textarea,
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            margin: 8px 0 10px 0;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        textarea {
+            height: 130px;
+            resize: vertical;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            margin-left: 8px;
+        }
+
+        textarea:focus,
+        input:focus {
+            outline: none;
+            border-color: #7b5cff;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: #7b5cff;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+
+        .topbar h1 { text-align: left; }
+
+        .logout {
+            width: auto;
+            padding: 9px 14px;
+            background: #ef6a62;
+        }
+
+        #result { margin-top: 25px; }
+
+        .group-card {
+            background: #f4f1ff;
+            border-left: 6px solid #7b5cff;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-top: 12px;
+        }
+
+        .group-card h3 { margin: 0 0 8px 0; color: #3b3b98; }
+
+        .member {
+            display: inline-block;
+            background: white;
+            border: 1px solid #d6ccff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            margin: 4px 4px 4px 0;
+        }
+
+        .leader {
+            display: inline-block;
+            background: #fff1ec;
+            color: #d95f3b;
+            border: 1px solid #ffb39f;
+            border-radius: 20px;
+            padding: 5px 14px;
+            margin: 8px 4px 4px 0;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #c0392b;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .hidden { display: none; }
+    </style>        
+</head>
+<body>
+    <div id="authCard" class="card auth-card">
+        <h1>Welcome</h1>
+        <p class="subtitle">Sign in to use Random Group Leader</p>
+
+        <div class="tabs">
+            <button id="loginTab" class="tab active" type="button">Login</button>
+            <button id="registerTab" class="tab" type="button">Register</button>
+        </div>
+
+        <form id="authForm">
+            <label for="username">Username</label>
+            <input id="username" type="text" autocomplete="username" required>
+
+            <label for="password">Password</label>
+            <input id="password" type="password" autocomplete="current-password" required>
+
+            <button id="authSubmit" type="submit">Login</button>
+        </form>
+
+        <p id="authMessage" class="error hidden"></p>
+    </div>
+
+    <div id="appCard" class="card hidden">
+        <div class="topbar">
+            <div>
+                <h1>Random Group Creator</h1>
+                <p class="subtitle" style="margin-bottom: 0;">Signed in as <strong id="currentUser"></strong></p>
+            </div>
+            <button id="logoutButton" class="logout" type="button">Logout</button>
+        </div>
+
+        <label for="names">Names (separate with comma):</label>
+        <textarea id="names" placeholder="alex,vince"></textarea>
+
+        <label for="count">Number of groups:</label>
+        <input type="number" id="count" value="2" min="1">
+
+        <div class="buttons">
+            <button id="createButton" type="button">Create Groups</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let mode = "login";
+        let groups = [];
+
+        const authCard = document.getElementById("authCard");
+        const appCard = document.getElementById("appCard");
+        const authMessage = document.getElementById("authMessage");
+        const loginTab = document.getElementById("loginTab");
+        const registerTab = document.getElementById("registerTab");
+        const authSubmit = document.getElementById("authSubmit");
+        const passwordInput = document.getElementById("password");
+
+        function setMode(nextMode) {
+            mode = nextMode;
+            loginTab.classList.toggle("active", mode === "login");
+            registerTab.classList.toggle("active", mode === "register");
+            authSubmit.textContent = mode === "login" ? "Login" : "Create Account";
+            passwordInput.autocomplete = mode === "login" ? "current-password" : "new-password";
+            authMessage.classList.add("hidden");
+        }
+
+        loginTab.addEventListener("click", () => setMode("login"));
+        registerTab.addEventListener("click", () => setMode("register"));
+
+        function showAuthError(message) {
+            authMessage.textContent = message;
+            authMessage.classList.remove("hidden");
+        }
+
+        function showApp(username) {
+            document.getElementById("currentUser").textContent = username;
+            authCard.classList.add("hidden");
+            appCard.classList.remove("hidden");
+        }
+
+        function showAuth() {
+            appCard.classList.add("hidden");
+            authCard.classList.remove("hidden");
+            document.getElementById("password").value = "";
+        }
+
+        async function checkSession() {
+            const response = await fetch("/api/auth/me");
+            if (response.ok) {
+                const data = await response.json();
+                showApp(data.username);
+            } else {
+                showAuth();
+            }
+        }
+
+        document.getElementById("authForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = passwordInput.value;
+            const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ username, password })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                showAuthError(data.message || "Unable to continue.");
+                return;
+            }
+            showApp(data.username);
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            showAuth();
+            document.getElementById("result").innerHTML = "";
+        });
+
+        function showError(message) {
+            const box = document.getElementById("result");
+            box.innerHTML = "";
+            const p = document.createElement("p");
+            p.className = "error";
+            p.textContent = message;
+            box.appendChild(p);
+        }
+
+        async function makeGroups() {
+            groups = [];
+            const names = document.getElementById("names").value;
+            const count = document.getElementById("count").value;
+            const response = await fetch("/api/group", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ names, count })
+            });
+            const text = await response.text();
+
+            if (response.status === 401) {
+                showAuth();
+                showAuthError("Your session has ended. Please log in again.");
+                return;
+            }
+            if (!response.ok) {
+                showError(text);
+                return;
+            }
+
+            const box = document.getElementById("result");
+            box.innerHTML = "";
+
+            const lines = text.split("\n");
+            for (const line of lines) {
+                if (line.trim() === "") continue;
+
+                const colon = line.indexOf(":");
+                const title = line.substring(0, colon);
+                const members = line.substring(colon + 1).split(",")
+                    .map(member => member.trim())
+                    .filter(member => member !== "");
+                const randomIndex = members.length === 0
+                    ? -1
+                    : Math.floor(Math.random() * members.length);
+                groups.push({
+                    title: title.trim(),
+                    members,
+                    leader: randomIndex >= 0 ? members[randomIndex] : ""
+                });
+            }
+            renderGroups();
+        }
+
+        function renderGroups() {
+            const box = document.getElementById("result");
+            box.innerHTML = "";
+
+            for (const group of groups) {
+                const card = document.createElement("div");
+                card.className = "group-card";
+
+                const heading = document.createElement("h3");
+                heading.textContent = group.title;
+                card.appendChild(heading);
+
+                for (const memberName of group.members) {
+                    const span = document.createElement("span");
+                    span.className = "member";
+                    span.textContent = memberName;
+                    card.appendChild(span);
+                }
+
+                if (group.leader) {
+                    const leader = document.createElement("div");
+                    leader.className = "leader";
+                    leader.textContent = "Random leader: " + group.leader;
+                    card.appendChild(leader);
+                }
+
+                box.appendChild(card);
+            }
+        }
+
+        document.getElementById("createButton").addEventListener("click", makeGroups);
+        checkSession();
+    </script>
+</body>
+</html>
